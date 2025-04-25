@@ -1,4 +1,4 @@
-from kfp import dsl
+from kfp import dsl, compiler
 
 @dsl.component
 def say_hello(name: str) -> str:
@@ -10,3 +10,5 @@ def say_hello(name: str) -> str:
 def hello_pipeline(recipient: str) -> str:
     hello_task = say_hello(name=recipient)
     return hello_task.output
+
+compiler.Compiler().compile(hello_pipeline, 'hello_pipeline.yaml')
