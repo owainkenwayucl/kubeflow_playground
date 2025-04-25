@@ -14,7 +14,7 @@ def hello_pipeline(recipient: str) -> str:
 
 compiler.Compiler().compile(hello_pipeline, 'hello_pipeline.yaml')
 
-client = Client(host='<MY-KFP-ENDPOINT>')
+client = Client(host='http://10.43.246.237:80')
 run = client.create_run_from_pipeline_package(
     'hello_pipeline.yaml',
     arguments={
