@@ -14,7 +14,7 @@ def hello_pipeline(recipient: str) -> str:
 
 compiler.Compiler().compile(hello_pipeline, 'hello_pipeline.yaml')
 
-client = Client(host='http://ml-pipeline.kubeflow.svc.cluster.local:8888')
+client = Client()
 run = client.create_run_from_pipeline_package(
     'hello_pipeline.yaml',
     arguments={
