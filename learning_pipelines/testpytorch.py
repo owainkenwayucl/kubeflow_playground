@@ -5,9 +5,9 @@ from kfp.client import Client
 def count_gpus() -> str:
     import torch
     num_gpus = torch.cuda.device_count()
-    r = f"{bold_on}Detected {torch.cuda.device_count()} Cuda devices.{style_off}"
+    r = f"Detected {torch.cuda.device_count()} Cuda devices."
     for a in range(torch.cuda.device_count()):
-        r = r + f"{bold_on}Detected Cuda Device {a}:{style_off} {torch.cuda.get_device_name(a)}"
+        r = r + f"Detected Cuda Device {a}: {torch.cuda.get_device_name(a)}"
     print(r)
     return r
 
