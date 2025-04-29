@@ -1,7 +1,7 @@
 from kfp import dsl, compiler
 from kfp.client import Client
 
-@dsl.component
+@dsl.component(base_image="python:3.11")
 def say_hello(name: str) -> str:
     hello_text = f'Hello, {name}!'
     print(hello_text)
