@@ -40,11 +40,12 @@ def training(d_num_epochs:int, d_repeats:int, d_batch_size:int, d_base:str) -> s
     def detect_platform():
         num_acc = "auto"
         device = "auto"
+        deviceid = 0
         # Set up devcies
         if torch.cuda.is_available():
             device = "cuda"
             num_acc = torch.cuda.device_count()
-            deviceid = 0
+            
             for i in range(num_acc):
                 device_name = torch.cuda.get_device_name(i)
                 print(f"Detected Cuda Device: {device_name}")
@@ -55,11 +56,8 @@ def training(d_num_epochs:int, d_repeats:int, d_batch_size:int, d_base:str) -> s
                     
             torch.set_float32_matmul_precision('high')
             print("Enabling TensorFloat32 cores.")
-            device = f"cuda:{deviceid}"
-        # can't use multiprocessing in kubernetes containers
-        num_acc = 1
 
-        return device, num_acc
+        return device, num_acc, deviceid
 
 
     def generate_dataloaders(dataset, batch_size):
@@ -221,7 +219,7 @@ def training(d_num_epochs:int, d_repeats:int, d_batch_size:int, d_base:str) -> s
         print(f"Current location: {cwd}")
         print(f"MedMNIST v{medmnist.__version__} @ {medmnist.HOMEPAGE}")
 
-        device, num_acc = detect_platform()
+        device, num_acc, deviceid = detect_platform()
         print(f"Detected device config: {device}:{num_acc}")
         stats = {}
         # Define parameters
@@ -261,7 +259,7 @@ def training(d_num_epochs:int, d_repeats:int, d_batch_size:int, d_base:str) -> s
 
         for repeat in range(repeats):
             corrected_epochs = num_epochs * (1 + repeat)
-            trainer = pytorch_lightning.Trainer(max_epochs=num_epochs, accelerator=device, devices=num_acc)
+            trainer = pytorch_lightning.Trainer(max_epochs=num_epochs, accelerator=device, devices=[deviceid])
                 
             print(f"Performing training iteration {repeat + 1} of {repeats} for {corrected_epochs} epochs.")
 
