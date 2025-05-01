@@ -1,11 +1,13 @@
+# Naïve attempt convert the training loop from https://github.com/owainkenwayucl/ML_Playground/tree/main/MedMNIST_PL/General
+# This is a terrible way to do it and it needs to be re-arched.
+
+# Needs two PVCs - one to cache dataset ("pathmnist") and one to hold our output ("medmnistcheckpoints")
 from kfp import dsl, compiler, kubernetes
 from kfp.client import Client
 
 @dsl.component(base_image="nvcr.io/nvidia/pytorch:25.03-py3", 
                packages_to_install=['lightning','medmnist','onnx','onnxscript','onnxruntime'])
 def training() -> str:
-
-
     import numpy
     import torch
     import torch.nn
