@@ -7,7 +7,7 @@ from kfp.client import Client
 
 @dsl.component(base_image="nvcr.io/nvidia/pytorch:25.03-py3", 
                packages_to_install=['lightning','medmnist','onnx','onnxscript','onnxruntime'])
-def training(d_num_epochs:int, d_repeats:int, d_batch_size:int, d_base=str) -> str:
+def training(d_num_epochs:int, d_repeats:int, d_batch_size:int, d_base:str) -> str:
     import numpy
     import torch
     import torch.nn
@@ -307,7 +307,7 @@ def training(d_num_epochs:int, d_repeats:int, d_batch_size:int, d_base=str) -> s
     return("complete")
 
 @dsl.pipeline
-def pathmnist_pipeline(num_epochs:int, repeats:int, batch_size:int, base=str) -> str:
+def pathmnist_pipeline(num_epochs:int, repeats:int, batch_size:int, base:str) -> str:
     gpu_task = training(d_num_epochs=num_epochs, d_repeats=repeats, d_batch_size=batch_size, d_base=base).set_memory_request("80Gi").add_node_selector_constraint(accelerator="nvidia.com/gpu").set_accelerator_limit(1)
     kubernetes.mount_pvc(
         gpu_task,
