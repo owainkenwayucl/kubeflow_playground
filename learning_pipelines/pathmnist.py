@@ -50,26 +50,13 @@ def training() -> str:
                 print(f"Detected Cuda Device: {device_name}")
             torch.set_float32_matmul_precision('high')
             print("Enabling TensorFloat32 cores.")
-        else:
-            try: 
-                import poptorch
-                num_acc = int(os.getenv("NUM_AVAILABLE_IPU", 1))
-                if num_acc <= 0:
-                    print(f"Detected Graphcore IPU(s), but NUM_AVAILABLE_IPU set to zero")
-                    device = "cpu"
-                else: 
-                    print(f"Detected {num_acc} Graphcore IPU(s)")
-                    device = "ipu"
-            except:
-                pass     
 
-        # can't use multiprocessing.
+        # can't use multiprocessing in kubernetes containers
         num_acc = 1
         return device, num_acc
 
 
     def generate_dataloaders(dataset, batch_size):
-
         info = medmnist.INFO[dataset]
         task = info["task"]
 
@@ -87,13 +74,10 @@ def training() -> str:
         val = test = data_class(split="val", transform=data_transform, download=True, size=224, mmap_mode='r')
         test = data_class(split="test", transform=data_transform, download=True, size=224, mmap_mode='r')
 
-        # can't use multiprocessing.
+        # can't use multiprocessing in kubernetes containers
         train_dataloader = torch.utils.data.DataLoader(dataset=train, batch_size = batch_size, shuffle=True, num_workers=0, persistent_workers=False)
         val_dataloader = torch.utils.data.DataLoader(dataset=val, batch_size = batch_size, shuffle=False, num_workers=0, persistent_workers=False)
         test_dataloader = torch.utils.data.DataLoader(dataset=test, batch_size = batch_size, shuffle=False, num_workers=0, persistent_workers=False)
-
-        #val_dataloader = None
-        #test_dataloader = None
 
         print(train)
 
@@ -224,7 +208,7 @@ def training() -> str:
         numpy.testing.assert_allclose(to_numpy(torch_gibberish), ort_outs[0], rtol=1e-03, atol=1e-05)
         print("Validation success")
 
-    def main(num_epochs=5, repeats=1, batch_size=1024, base="resnet18", half_precision=False, lr=0.001):
+    def main(num_epochs=5, repeats=1, batch_size=1024, base="resnet18", lr=0.001):
         cwd = os.getcwd()
         print(f"Initial location: {cwd}")
         nwd = f"/root/pathmnist"
@@ -275,20 +259,9 @@ def training() -> str:
 
         for repeat in range(repeats):
             corrected_epochs = num_epochs * (1 + repeat)
-            if half_precision: 
-                trainer = pytorch_lightning.Trainer(max_epochs=num_epochs, accelerator=device, devices=num_acc, precision=16)
-            else: 
-                trainer = pytorch_lightning.Trainer(max_epochs=num_epochs, accelerator=device, devices=num_acc)
+            trainer = pytorch_lightning.Trainer(max_epochs=num_epochs, accelerator=device, devices=num_acc)
                 
             print(f"Performing training iteration {repeat + 1} of {repeats} for {corrected_epochs} epochs.")
-
-            # This results in a fail on the Nvidia systems which is annoying. Docs say how we do this has changed so 
-            # I presume that the "acceptable" way has changed between the obsolete version of Pytorch/Lightning which 
-            # is on Graphcore and the current "best practice".
-            if half_precision: 
-                print(f"Quantising 32 bit floats to 16 bit...")
-                model = model.half()
-                prec_words = "16bit"
 
             output_filename = f"medmnist_classifier_{base_model_str}_{dataset}_{corrected_epochs}_{repeats}_{prec_words}"
 
@@ -316,13 +289,6 @@ def training() -> str:
 
             val_model = model
             val_trainer = trainer
-            if device == "ipu":
-                # Kludge for stat return bugs on Graphcore is to validate + test on CPU
-                print(f"As we are running on Graphcore, validating on CPU...")
-                if half_precision: 
-                    print(f"Up-casting 16 bit floats to 32 bit...")
-                    val_model = model.float()
-                val_trainer = pytorch_lightning.Trainer(max_epochs=num_epochs, accelerator="cpu", devices=1)
             val_stats = val_trainer.validate(model=val_model, dataloaders=val_dl)
             test_stats = val_trainer.test(model=val_model, dataloaders=test_dl)
 
@@ -343,6 +309,7 @@ def training() -> str:
 
     main()
     return("complete")
+    
 @dsl.pipeline
 def pathmnist_pipeline() -> str:
     gpu_task = training().set_memory_request("80Gi").add_node_selector_constraint(accelerator="nvidia.com/gpu").set_accelerator_limit(1)
