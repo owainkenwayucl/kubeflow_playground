@@ -8,6 +8,8 @@ def count_gpus() -> str:
     r = f"Detected {torch.cuda.device_count()} Cuda devices."
     for a in range(torch.cuda.device_count()):
         r = r + f"Detected Cuda Device {a}: {torch.cuda.get_device_name(a)}"
+        freemem,totalmem = torch.cuda.mem_get_info(a)
+        print(f"Detected Free {freemem} and Total {totalmem} memory")
     print(r)
     return r
 
