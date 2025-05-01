@@ -45,7 +45,7 @@ def training(d_num_epochs:int, d_repeats:int, d_batch_size:int, d_base:str) -> s
         if torch.cuda.is_available():
             device = "cuda"
             num_acc = torch.cuda.device_count()
-            
+            print(f"Detected {num_acc} Cuda devices.")
             for i in range(num_acc):
                 device_name = torch.cuda.get_device_name(i)
                 print(f"Detected Cuda Device: {device_name}")
@@ -220,7 +220,7 @@ def training(d_num_epochs:int, d_repeats:int, d_batch_size:int, d_base:str) -> s
         print(f"MedMNIST v{medmnist.__version__} @ {medmnist.HOMEPAGE}")
 
         device, num_acc, deviceid = detect_platform()
-        print(f"Detected device config: {device}:{num_acc}")
+        print(f"Detected device config: {device}:{num_acc}:{deviceid}")
         stats = {}
         # Define parameters
         dataset = "pathmnist"
