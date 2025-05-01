@@ -13,7 +13,7 @@ def count_gpus() -> str:
 
 @dsl.pipeline
 def gpu_pipeline() -> str:
-    gpu_task = count_gpus().set_gpu_limit(1)
+    gpu_task = count_gpus()
     return gpu_task.output
 
 compiler.Compiler().compile(gpu_pipeline, 'gpu_pipeline.yaml')
