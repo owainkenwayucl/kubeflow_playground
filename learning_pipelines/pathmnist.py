@@ -90,10 +90,6 @@ def training() -> str:
             self.task = task
             self.device_name = device
             self.log_safe = True
-            if (self.device_name == "ipu"):
-                self.log_safe = False
-                self.val_outputs = []
-                self.test_outputs = []
             self.lr = lr
 
             if task == mlbc:
@@ -309,7 +305,7 @@ def training() -> str:
 
     main()
     return("complete")
-    
+
 @dsl.pipeline
 def pathmnist_pipeline() -> str:
     gpu_task = training().set_memory_request("80Gi").add_node_selector_constraint(accelerator="nvidia.com/gpu").set_accelerator_limit(1)
