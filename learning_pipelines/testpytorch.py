@@ -13,7 +13,7 @@ def count_gpus() -> str:
 
 @dsl.pipeline
 def gpu_pipeline() -> str:
-    gpu_task = count_gpus()
+    gpu_task = count_gpus().add_node_selector_constraint(accelerator="nvidia.com/gpu").set_accelerator_limit(1)
     return gpu_task.output
 
 compiler.Compiler().compile(gpu_pipeline, 'gpu_pipeline.yaml')
