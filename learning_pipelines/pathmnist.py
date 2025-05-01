@@ -3,7 +3,6 @@
 
 # Needs two PVCs - one to cache dataset ("pathmnist") and one to hold our output ("medmnistcheckpoints")
 from kfp import dsl, compiler, kubernetes
-from kfp.client import Client
 
 @dsl.component(base_image="nvcr.io/nvidia/pytorch:25.03-py3", 
                packages_to_install=['lightning','medmnist','onnx','onnxscript','onnxruntime'])
@@ -325,14 +324,3 @@ def pathmnist_pipeline(num_epochs:int, repeats:int, batch_size:int, base:str) ->
     return gpu_task.output
 
 compiler.Compiler().compile(pathmnist_pipeline, 'pathmnist_pipeline.yaml')
-
-client = Client()
-run = client.create_run_from_pipeline_package(
-    'pathmnist_pipeline.yaml',
-    arguments={
-        "num_epochs": 10,
-        "repeats": 2,
-        "batch_size": 1024,
-        "base": "resnet50"
-    },
-)
