@@ -49,9 +49,10 @@ def training(d_num_epochs:int, d_repeats:int, d_batch_size:int, d_base:str) -> s
             for i in range(num_acc):
                 device_name = torch.cuda.get_device_name(i)
                 print(f"Detected Cuda Device: {device_name}")
+                # Sometimes kubeflow effs up and shows us all the GPUs. The correct one is the one that has memory.
                 freemem,_ = torch.cuda.mem_get_info(i)
                 print(f"Free memory: {freemem}")
-                if freemem > 1024:
+                if freemem > (1024*1024*1024):  # > 1 GiB
                     deviceid = i
                     
             torch.set_float32_matmul_precision('high')
