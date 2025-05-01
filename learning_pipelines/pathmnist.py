@@ -44,14 +44,21 @@ def training(d_num_epochs:int, d_repeats:int, d_batch_size:int, d_base:str) -> s
         if torch.cuda.is_available():
             device = "cuda"
             num_acc = torch.cuda.device_count()
+            deviceid = 0
             for i in range(num_acc):
                 device_name = torch.cuda.get_device_name(i)
                 print(f"Detected Cuda Device: {device_name}")
+                freemem,_ = torch.cuda.mem_get_info(i)
+                print(f"Free memory: {freemem}")
+                if freemem > 1024:
+                    deviceid = i
+                    
             torch.set_float32_matmul_precision('high')
             print("Enabling TensorFloat32 cores.")
-
+            device = f"cuda:{deviceid}"
         # can't use multiprocessing in kubernetes containers
         num_acc = 1
+
         return device, num_acc
 
 
