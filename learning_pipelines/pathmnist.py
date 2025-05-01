@@ -63,6 +63,7 @@ def training() -> str:
             except:
                 pass     
 
+        # can't use multiprocessing.
         num_acc = 1
         return device, num_acc
 
@@ -86,6 +87,7 @@ def training() -> str:
         val = test = data_class(split="val", transform=data_transform, download=True, size=224, mmap_mode='r')
         test = data_class(split="test", transform=data_transform, download=True, size=224, mmap_mode='r')
 
+        # can't use multiprocessing.
         train_dataloader = torch.utils.data.DataLoader(dataset=train, batch_size = batch_size, shuffle=True, num_workers=0, persistent_workers=False)
         val_dataloader = torch.utils.data.DataLoader(dataset=val, batch_size = batch_size, shuffle=False, num_workers=0, persistent_workers=False)
         test_dataloader = torch.utils.data.DataLoader(dataset=test, batch_size = batch_size, shuffle=False, num_workers=0, persistent_workers=False)
@@ -342,7 +344,7 @@ def training() -> str:
     main()
     return("complete")
 @dsl.pipeline
-def gpu_pipeline() -> str:
+def pathmnist_pipeline() -> str:
     gpu_task = training().set_memory_request("80Gi").add_node_selector_constraint(accelerator="nvidia.com/gpu").set_accelerator_limit(1)
     kubernetes.mount_pvc(
         gpu_task,
@@ -359,10 +361,10 @@ def gpu_pipeline() -> str:
 
     return gpu_task.output
 
-compiler.Compiler().compile(gpu_pipeline, 'gpu_pipeline.yaml')
+compiler.Compiler().compile(pathmnist_pipeline, 'pathmnist_pipeline.yaml')
 
 client = Client()
 run = client.create_run_from_pipeline_package(
-    'gpu_pipeline.yaml',
+    'pathmnist_pipeline.yaml',
     arguments={},
 )
