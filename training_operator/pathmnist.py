@@ -1,6 +1,6 @@
 from kubeflow.trainer import TrainerClient, CustomTrainer
 
-def train_pytorch()
+def train_pytorch():
     import torch
     import torch.nn
     import torchvision.models
