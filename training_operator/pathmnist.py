@@ -8,6 +8,7 @@ def train_pytorch():
     import torchvision.transforms
     import torch.distributed
     import medmnist
+    import os
 
     num_epochs = 5
 
@@ -15,6 +16,7 @@ def train_pytorch():
     mlbc = "multi-label, binary-class"
     lr = 0.001
 
+    print("Setting up medmnist")
     info = medmnist.INFO[dataset]
     task = info["task"]
 
@@ -34,6 +36,7 @@ def train_pytorch():
 
     train_dataloader = torch.utils.data.DataLoader(dataset=train, batch_size = train_batch_size, shuffle=True)
 
+    print("medmnist set up")
     model = torchvision.models.resnet18(num_classes=n_classes)
 
     if task == mlbc:
@@ -94,7 +97,7 @@ tc.create_job(
     name=jobid,
     train_func=train_pytorch,
     num_procs_per_worker="auto",
-    num_workers=2,
+    num_workers=1,
     packages_to_install=['medmnist'],
     resources_per_worker={"gpu": "1"},
 )
