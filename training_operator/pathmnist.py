@@ -85,11 +85,20 @@ def train_pytorch():
         print("Training is finished")
     torch.distributed.destroy_process_group()
 
-# Start PyTorchJob with 3 Workers and 1 GPU per Worker (e.g. multi-node, multi-worker job).
-TrainingClient().create_job(
-    name="pytorch-ddp",
+
+jobid = "pathmnisttest"
+
+tc = TrainingClient()
+
+tc.create_job(
+    name=jobid,
     train_func=train_pytorch,
     num_procs_per_worker="auto",
     num_workers=2,
-    resources_per_worker={"gpu": "2"},
+    packages_to_install=['medmnist'],
+    resources_per_worker={"gpu": "1"},
 )
+
+print(tc.list_jobs())
+
+print(jobid)
