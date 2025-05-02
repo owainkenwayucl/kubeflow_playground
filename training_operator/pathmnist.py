@@ -95,7 +95,7 @@ jobid = "pathmnisttest"
 
 tc = TrainingClient()
 
-pathmnist_cache = kubeflow.training.models.V1Volume(name = "pathmnist_mount", persistent_volume_claim="pathmnist")
+pathmnist_cache = kubeflow.training.models.V1Volume(name = "pathmnist_mount", persistent_volume_claim=kubeflow.training.models.V1PersistentVolumeClaimVolumeSource(claim_name="pathmnist"))
 pathmnist_cache_m = kubeflow.training.models.V1VolumeMount(name="pathmnist_mount", mount_path="/root/.medmnist", read_only=True)
 
 tc.create_job(
