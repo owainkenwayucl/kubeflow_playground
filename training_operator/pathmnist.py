@@ -1,4 +1,3 @@
-from kubeflow.trainer import TrainerClient, CustomTrainer
 
 def train_pytorch():
     import torch
@@ -84,25 +83,3 @@ def train_pytorch():
         print("Training is finished")
     torch.distributed.destroy_process_group()
 
-for r in TrainerClient().list_runtimes():
-    print(f"Runtime: {r.name}")
-
-job_id = TrainerClient().train(
-    trainer=CustomTrainer(
-        func=train_pytorch,
-        num_nodes=2,
-        resources_per_node={
-            "cpu": 8,
-            "memory": "16Gi",
-            "gpu": 2, # Comment this line if you don't have GPUs.
-        },
-    ),
-    runtime=TrainerClient().get_runtime("torch-distributed"),
-)
-
-for s in TrainerClient().get_job(name=job_id).steps:
-    print(f"Step: {s.name}, Status: {s.status}, Devices: {s.device} x {s.device_count}")
-
-logs = TrainerClient().get_job_logs(name=job_id)
-
-print(logs["node-0"])
