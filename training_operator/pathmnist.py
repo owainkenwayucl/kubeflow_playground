@@ -1,5 +1,6 @@
 
 from kubeflow.training import TrainingClient
+import kubeflow.training.models
 
 def train_pytorch():
     import torch
@@ -8,7 +9,7 @@ def train_pytorch():
     import torchvision.transforms
     import torch.distributed
     import medmnist
-    import kubeflow.training.models
+    
     import os
 
     num_epochs = 5
