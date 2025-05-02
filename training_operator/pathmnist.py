@@ -8,6 +8,7 @@ def train_pytorch():
     import torchvision.transforms
     import torch.distributed
     import medmnist
+    import kubeflow.training.models
     import os
 
     num_epochs = 5
@@ -93,6 +94,9 @@ jobid = "pathmnisttest"
 
 tc = TrainingClient()
 
+pathmnist_cache = kubeflow.training.models.V1Volume(name = "pathmnist_mount", persistent_volume_claim="pathmnist")
+pathmnist_cache_m = kubeflow.training.models.V1VolumeMount(name="pathmnist_mount", mount_path="/root/.medmnist", read_only=True)
+
 tc.create_job(
     name=jobid,
     train_func=train_pytorch,
@@ -100,6 +104,8 @@ tc.create_job(
     num_workers=1,
     packages_to_install=['medmnist'],
     resources_per_worker={"gpu": "1"},
+    volumes=[pathmnist_cache],
+    volume_mounts=[pathmnist_cache_m]
 )
 
 print(tc.list_jobs())
